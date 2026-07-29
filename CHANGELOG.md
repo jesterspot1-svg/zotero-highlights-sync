@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-07-29
+
+### Changed
+
+- Prepared the first stable community-directory release.
+- Updated the Obsidian lint rules and aligned conditional commands with the
+  recommended callback API.
+- Expanded the README disclosures for local network and out-of-vault PDF
+  access.
+- Improved release validation and release-note generation.
+
 ## [0.1.2] - 2026-07-29
 
 ### Changed

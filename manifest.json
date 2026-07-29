@@ -1,7 +1,7 @@
 {
   "id": "zotero-highlights-sync",
   "name": "Zotero Highlights Sync",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "minAppVersion": "1.12.7",
   "description": "Creates linked book notes and synchronizes Zotero PDF annotations.",
   "author": "Timur",

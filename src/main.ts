@@ -84,16 +84,32 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     this.addCommand({
       id: "inspect-current-book-annotations",
       name: "Проверить пометки текущей книги",
-      callback: () => {
-        void this.inspectCurrentBookAnnotations();
+      checkCallback: (checking) => {
+        if (this.getActiveAttachmentKey() === null) {
+          return false;
+        }
+
+        if (!checking) {
+          void this.inspectCurrentBookAnnotations();
+        }
+
+        return true;
       }
     });
 
     this.addCommand({
       id: "create-all-atomic-notes",
       name: "Создать отдельные заметки для всех пометок",
-      callback: () => {
-        void this.createAllAtomicNotes();
+      checkCallback: (checking) => {
+        if (this.getActiveAnnotationsNote() === null) {
+          return false;
+        }
+
+        if (!checking) {
+          void this.createAllAtomicNotes();
+        }
+
+        return true;
       }
     });
 

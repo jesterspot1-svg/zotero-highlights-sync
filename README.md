@@ -107,8 +107,12 @@ The managed block variable is required for updating atomic notes.
 
 ## Privacy and data access
 
-- The plugin communicates only with Zotero's local API at
-  `http://localhost:23119`.
+- **Network use:** the plugin sends read-only HTTP requests only to Zotero's
+  local API at `http://localhost:23119/api`. It does not connect to internet
+  services.
+- **Access outside the vault:** the plugin reads the local PDF path returned by
+  Zotero and reads that selected PDF to restore paragraph and list boundaries.
+  It does not modify the PDF or any other file outside the vault.
 - It does not require a Zotero API key or cloud account.
 - It does not send telemetry, analytics, vault contents, PDF contents, or
   annotation data to external services.
@@ -117,6 +121,7 @@ The managed block variable is required for updating atomic notes.
   boundaries.
 - It reads Zotero's local full-text metadata to determine the page count when
   the Zotero book item does not contain one.
+- It does not modify the Zotero library.
 - It creates and updates Markdown files only inside the active vault.
 
 ## Installation from a release

@@ -3,7 +3,7 @@ name: Release Obsidian plugin
 on:
   push:
     tags:
-      - "*"
+      - "*.*.*"
 
 jobs:
   build:
@@ -23,6 +23,8 @@ jobs:
         run: npm ci
       - name: Check code
         run: npm run lint
+      - name: Audit production dependencies
+        run: npm run audit:production
       - name: Build plugin
         run: npm run build
       - name: Attest build provenance
@@ -38,5 +40,6 @@ jobs:
           tag="${GITHUB_REF#refs/tags/}"
           gh release create "$tag" \
             --title="$tag" \
+            --generate-notes \
             --draft \
             main.js manifest.json styles.css LICENSE THIRD_PARTY_LICENSES.txt
