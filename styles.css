@@ -1,0 +1,90 @@
+.zhs-template-path-input {
+  min-width: min(28rem, 45vw);
+}
+
+.zhs-template-status {
+  margin-top: var(--size-2-1);
+  font-size: var(--font-ui-smaller);
+}
+
+.zhs-template-status-empty {
+  color: var(--text-muted);
+}
+
+.zhs-template-status-valid {
+  color: var(--text-success);
+}
+
+.zhs-template-status-invalid {
+  color: var(--text-error);
+}
+
+.zhs-book-suggestion-title {
+  color: var(--text-normal);
+  font-weight: var(--font-semibold);
+}
+
+.zhs-book-suggestion-details {
+  margin-top: var(--size-2-1);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.zhs-annotations-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  margin-block: var(--size-4-3);
+}
+
+.zhs-toolbar-error {
+  color: var(--text-error);
+  font-size: var(--font-ui-small);
+}
+
+.zhs-annotation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-4-2);
+  margin-block: var(--size-4-2) 3em;
+}
+
+.callout[data-callout="zhs-annotation-yellow"] {
+  --callout-color: 255, 212, 0;
+  --callout-icon: lucide-highlighter;
+}
+
+.callout[data-callout="zhs-annotation-red"] {
+  --callout-color: 255, 102, 102;
+  --callout-icon: lucide-highlighter;
+}
+
+.callout[data-callout="zhs-annotation-green"] {
+  --callout-color: 95, 178, 54;
+  --callout-icon: lucide-highlighter;
+}
+
+.callout[data-callout="zhs-annotation-blue"] {
+  --callout-color: 46, 168, 229;
+  --callout-icon: lucide-highlighter;
+}
+
+.callout[data-callout="zhs-annotation-purple"] {
+  --callout-color: 162, 138, 229;
+  --callout-icon: lucide-highlighter;
+}
+
+.callout[data-callout="zhs-annotation-magenta"] {
+  --callout-color: 229, 110, 238;
+  --callout-icon: lucide-highlighter;
+}
+
+.callout[data-callout="zhs-annotation-orange"] {
+  --callout-color: 241, 152, 55;
+  --callout-icon: lucide-highlighter;
+}
+
+.callout[data-callout="zhs-annotation-gray"] {
+  --callout-color: 170, 170, 170;
+  --callout-icon: lucide-highlighter;
+}
