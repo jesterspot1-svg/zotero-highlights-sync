@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-07-29
+
+### Changed
+
+- Recreated the publication release with a lightweight Git tag for community
+  directory compatibility.
+
 ## [0.1.1] - 2026-07-29
 
 ### Changed
