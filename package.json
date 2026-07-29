@@ -17,6 +17,14 @@
     "annotations",
     "pdf"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jesterspot1-svg/zotero-highlights-sync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jesterspot1-svg/zotero-highlights-sync/issues"
+  },
+  "homepage": "https://github.com/jesterspot1-svg/zotero-highlights-sync#readme",
   "license": "MIT",
   "dependencies": {
     "pdfjs-dist": "6.1.200"

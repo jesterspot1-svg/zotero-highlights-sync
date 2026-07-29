@@ -5,5 +5,6 @@
   "minAppVersion": "1.9.0",
   "description": "Creates linked book notes and synchronizes Zotero PDF annotations.",
   "author": "Timur",
+  "authorUrl": "https://github.com/jesterspot1-svg",
   "isDesktopOnly": true
 }
