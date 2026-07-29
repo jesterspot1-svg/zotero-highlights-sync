@@ -24,7 +24,7 @@ installation.
 
 ## Requirements
 
-- Obsidian 1.9.0 or newer on desktop
+- Obsidian 1.12.7 or newer on desktop
 - Zotero Desktop running on the same computer
 - Zotero local API enabled:
   **Settings → Advanced → Allow other applications on this computer to
