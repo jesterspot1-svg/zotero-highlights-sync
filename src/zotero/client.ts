@@ -21,6 +21,45 @@ interface LocalHttpResponse {
   headers: Record<string, string>;
 }
 
+interface NodeHttpResponse {
+  statusCode?: number;
+  headers: Record<string, string | string[] | undefined>;
+  setEncoding(encoding: "utf8"): void;
+  on(event: "data", listener: (chunk: string) => void): NodeHttpResponse;
+  on(event: "end", listener: () => void): NodeHttpResponse;
+  on(
+    event: "error",
+    listener: (error: unknown) => void
+  ): NodeHttpResponse;
+}
+
+interface NodeHttpRequest {
+  on(event: "timeout", listener: () => void): NodeHttpRequest;
+  on(
+    event: "error",
+    listener: (error: unknown) => void
+  ): NodeHttpRequest;
+  destroy(error?: Error): void;
+  end(): void;
+}
+
+interface NodeHttpRequestOptions {
+  method: "GET";
+  headers: Record<string, string>;
+  timeout: number;
+}
+
+type RequestWithNodeHttp = (
+  url: string,
+  options: NodeHttpRequestOptions,
+  listener: (response: NodeHttpResponse) => void
+) => NodeHttpRequest;
+
+type ConvertFileUrlToPath = (url: URL) => string;
+
+const sendNodeHttpRequest = nodeHttpRequest as unknown as RequestWithNodeHttp;
+const convertFileUrlToPath = fileURLToPath as unknown as ConvertFileUrlToPath;
+
 interface ZoteroCreator {
   creatorType: string;
   firstName?: string;
@@ -247,7 +286,7 @@ export class ZoteroClient {
         );
       }
 
-      return fileURLToPath(fileUrl);
+      return convertFileUrlToPath(fileUrl);
     } catch (error: unknown) {
       throw normalizeConnectionError(error);
     }
@@ -343,7 +382,7 @@ async function requestLocalZotero(url: string): Promise<LocalHttpResponse> {
 
 function requestWithNodeHttp(url: string): Promise<LocalHttpResponse> {
   return new Promise((resolve, reject) => {
-    const request = nodeHttpRequest(
+    const request = sendNodeHttpRequest(
       url,
       {
         method: "GET",
@@ -368,14 +407,18 @@ function requestWithNodeHttp(url: string): Promise<LocalHttpResponse> {
           });
         });
 
-        response.on("error", reject);
+        response.on("error", (error: unknown) => {
+          reject(toError(error));
+        });
       }
     );
 
     request.on("timeout", () => {
       request.destroy(new Error("Превышено время ожидания ответа Zotero."));
     });
-    request.on("error", reject);
+    request.on("error", (error: unknown) => {
+      reject(toError(error));
+    });
     request.end();
   });
 }
@@ -413,6 +456,12 @@ function getErrorMessage(error: unknown): string {
   }
 
   return typeof error === "string" ? error : "";
+}
+
+function toError(error: unknown): Error {
+  return error instanceof Error
+    ? error
+    : new Error(getErrorMessage(error) || "Unknown Zotero HTTP error.");
 }
 
 function isZoteroBookApiItem(value: unknown): value is ZoteroBookApiItem {

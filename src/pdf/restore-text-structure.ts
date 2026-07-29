@@ -37,6 +37,10 @@ interface PdfJsGlobal {
   };
 }
 
+type ReadPdfFile = (path: string) => Promise<Uint8Array>;
+
+const readPdfFile = readFile as unknown as ReadPdfFile;
+
 export class PdfStructureError extends Error {
   constructor(message: string) {
     super(message);
@@ -50,7 +54,7 @@ export async function restoreAnnotationsTextStructure(
 ): Promise<ZoteroAnnotation[]> {
   let pdfBytes: Uint8Array;
   try {
-    pdfBytes = new Uint8Array(await readFile(pdfPath));
+    pdfBytes = new Uint8Array(await readPdfFile(pdfPath));
   } catch {
     throw new PdfStructureError(
       "Не удалось прочитать локальный PDF для восстановления абзацев."
