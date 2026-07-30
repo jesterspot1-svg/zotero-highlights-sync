@@ -1,10 +1,20 @@
 import {
   type App,
+  type Command,
   Notice,
   Plugin,
   TFile
 } from "obsidian";
 
+import {
+  isPluginLanguage,
+  refreshLocalizedElements,
+  setLocalizedText,
+  setPluginLanguage,
+  translate,
+  type PluginLanguage,
+  type TranslationKey
+} from "./i18n";
 import {
   AtomicNoteError,
   createAtomicNote,
@@ -60,58 +70,73 @@ interface CompletedAnnotationsSync {
 export default class ZoteroHighlightsSyncPlugin extends Plugin {
   settings: ZoteroHighlightsSyncSettings = DEFAULT_SETTINGS;
   private readonly zoteroClient = new ZoteroClient();
+  private readonly localizedCommands: Array<{
+    command: Command;
+    key: TranslationKey;
+  }> = [];
 
   async onload(): Promise<void> {
     await this.loadSettings();
     this.addSettingTab(new ZoteroHighlightsSyncSettingTab(this.app, this));
 
-    this.addCommand({
-      id: "create-book",
-      name: "Создание книги",
-      callback: () => {
-        void this.openBookPicker();
+    this.localizedCommands.push(
+      {
+        key: "command.createBook",
+        command: this.addCommand({
+          id: "create-book",
+          name: translate("command.createBook"),
+          callback: () => {
+            void this.openBookPicker();
+          }
+        })
+      },
+      {
+        key: "command.checkConnection",
+        command: this.addCommand({
+          id: "check-zotero-connection",
+          name: translate("command.checkConnection"),
+          callback: () => {
+            void this.checkZoteroConnection();
+          }
+        })
+      },
+      {
+        key: "command.inspectAnnotations",
+        command: this.addCommand({
+          id: "inspect-current-book-annotations",
+          name: translate("command.inspectAnnotations"),
+          checkCallback: (checking) => {
+            if (this.getActiveAttachmentKey() === null) {
+              return false;
+            }
+
+            if (!checking) {
+              void this.inspectCurrentBookAnnotations();
+            }
+
+            return true;
+          }
+        })
+      },
+      {
+        key: "command.createAllAtomic",
+        command: this.addCommand({
+          id: "create-all-atomic-notes",
+          name: translate("command.createAllAtomic"),
+          checkCallback: (checking) => {
+            if (this.getActiveAnnotationsNote() === null) {
+              return false;
+            }
+
+            if (!checking) {
+              void this.createAllAtomicNotes();
+            }
+
+            return true;
+          }
+        })
       }
-    });
-
-    this.addCommand({
-      id: "check-zotero-connection",
-      name: "Проверить соединение с Zotero",
-      callback: () => {
-        void this.checkZoteroConnection();
-      }
-    });
-
-    this.addCommand({
-      id: "inspect-current-book-annotations",
-      name: "Проверить пометки текущей книги",
-      checkCallback: (checking) => {
-        if (this.getActiveAttachmentKey() === null) {
-          return false;
-        }
-
-        if (!checking) {
-          void this.inspectCurrentBookAnnotations();
-        }
-
-        return true;
-      }
-    });
-
-    this.addCommand({
-      id: "create-all-atomic-notes",
-      name: "Создать отдельные заметки для всех пометок",
-      checkCallback: (checking) => {
-        if (this.getActiveAnnotationsNote() === null) {
-          return false;
-        }
-
-        if (!checking) {
-          void this.createAllAtomicNotes();
-        }
-
-        return true;
-      }
-    });
+    );
 
     this.registerMarkdownCodeBlockProcessor(
       "zhs-annotations-toolbar",
@@ -124,15 +149,15 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
           cls: "zhs-annotations-toolbar"
         });
         const updateButton = toolbar.createEl("button", {
-          cls: "mod-cta",
-          text: "Обновить пометки"
+          cls: "mod-cta"
         });
+        setLocalizedText(updateButton, "button.updateAnnotations");
 
         if (attachmentKey === null) {
           updateButton.disabled = true;
           toolbar.createSpan({
             cls: "zhs-toolbar-error",
-            text: "В служебном блоке отсутствует ключ PDF Zotero"
+            text: translate("toolbar.missingAttachmentKey")
           });
           return;
         }
@@ -174,7 +199,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
         ) {
           el.createSpan({
             cls: "zhs-toolbar-error",
-            text: "Некорректные данные кнопок пометки"
+            text: translate("toolbar.invalidAnnotationData")
           });
           return;
         }
@@ -191,14 +216,33 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    this.settings = {
+    const loaded = {
       ...DEFAULT_SETTINGS,
       ...(await this.loadData() as Partial<ZoteroHighlightsSyncSettings> | null)
     };
+    this.settings = {
+      ...loaded,
+      language: isPluginLanguage(loaded.language)
+        ? loaded.language
+        : DEFAULT_SETTINGS.language
+    };
+    setPluginLanguage(this.settings.language);
   }
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+  }
+
+  async changeLanguage(language: PluginLanguage): Promise<void> {
+    this.settings.language = language;
+    setPluginLanguage(language);
+    await this.saveSettings();
+
+    for (const localizedCommand of this.localizedCommands) {
+      localizedCommand.command.name = translate(localizedCommand.key);
+    }
+
+    refreshLocalizedElements();
   }
 
   private async openBookPicker(): Promise<void> {
@@ -206,7 +250,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       const books = await this.zoteroClient.getBooks();
 
       if (books.length === 0) {
-        new Notice("В личной библиотеке Zotero не найдено книг");
+        new Notice(translate("notice.noBooks"));
         return;
       }
 
@@ -224,7 +268,9 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
 
       if (attachments.length === 0) {
         new Notice(
-          `У книги «${book.title}» нет PDF-вложения в Zotero`,
+          translate("notice.noPdf", {
+            title: book.title
+          }),
           8000
         );
         return;
@@ -275,19 +321,21 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       await this.app.workspace.getLeaf(false).openFile(result.bookFile);
 
       if (!result.bookCreated && !result.annotationsCreated) {
-        new Notice("Заметки этой книги уже существуют — открыта заметка книги");
+        new Notice(translate("notice.notesAlreadyExist"));
         return;
       }
 
       const created: string[] = [];
       if (result.bookCreated) {
-        created.push("заметка книги");
+        created.push(translate("notice.createdBookNote"));
       }
       if (result.annotationsCreated) {
-        created.push("заметка с пометками");
+        created.push(translate("notice.createdAnnotationsNote"));
       }
 
-      new Notice(`Создано: ${created.join(" и ")}`, 7000);
+      new Notice(translate("notice.created", {
+        items: created.join(", ")
+      }), 7000);
     } catch (error: unknown) {
       if (error instanceof TemplateError || error instanceof NoteCreationError) {
         new Notice(error.message, 10000);
@@ -296,8 +344,10 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
 
       const message = error instanceof Error
         ? error.message
-        : "Неизвестная ошибка";
-      new Notice(`Не удалось создать заметки: ${message}`, 10000);
+        : translate("common.unknownError");
+      new Notice(translate("notice.createFailed", {
+        message
+      }), 10000);
     }
   }
 
@@ -331,7 +381,9 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
   private async checkZoteroConnection(): Promise<void> {
     try {
       const books = await this.zoteroClient.getBooks();
-      new Notice(`Соединение с Zotero установлено. Книг: ${books.length}`);
+      new Notice(translate("notice.connectionOk", {
+        count: books.length
+      }));
     } catch (error: unknown) {
       this.showZoteroConnectionError(error);
     }
@@ -341,7 +393,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     const attachmentKey = this.getActiveAttachmentKey();
     if (attachmentKey === null) {
       new Notice(
-        "Откройте заметку книги или заметку с пометками, содержащую ключ PDF Zotero",
+        translate("notice.openBookOrAnnotations"),
         9000
       );
       return;
@@ -357,8 +409,11 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       ).length;
 
       new Notice(
-        `Zotero вернул пометок: ${annotations.length}. `
-        + `С текстом: ${withText}. С комментариями: ${withComments}.`,
+        translate("notice.annotationStats", {
+          count: annotations.length,
+          withText,
+          withComments
+        }),
         10000
       );
     } catch (error: unknown) {
@@ -372,13 +427,13 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     button: HTMLButtonElement
   ): Promise<void> {
     button.disabled = true;
-    button.setText("Обновление…");
+    setLocalizedText(button, "button.updating");
 
     try {
       await this.synchronizeAnnotationsNote(sourcePath, attachmentKey);
     } finally {
       button.disabled = false;
-      button.setText("Обновить пометки");
+      setLocalizedText(button, "button.updateAnnotations");
     }
   }
 
@@ -388,7 +443,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
   ): Promise<void> {
     const note = this.app.vault.getAbstractFileByPath(sourcePath);
     if (!(note instanceof TFile) || note.extension !== "md") {
-      new Notice("Не удалось найти общую заметку с пометками", 8000);
+      new Notice(translate("notice.annotationsNoteNotFound"), 8000);
       return;
     }
 
@@ -396,16 +451,23 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       const sync = await this.performAnnotationsSync(note, attachmentKey);
       const atomicText = sync.atomic.total === 0
         ? ""
-        : ` Отдельных заметок обновлено: ${sync.atomic.updated}; `
-          + `источник удалён: ${sync.atomic.deleted}.`
+        : translate("notice.atomicSync", {
+          updated: sync.atomic.updated,
+          deleted: sync.atomic.deleted
+        })
           + (sync.atomic.failed.length > 0
-            ? ` Не удалось обновить: ${sync.atomic.failed.join(", ")}.`
+            ? translate("notice.atomicSyncFailed", {
+              items: sync.atomic.failed.join(", ")
+            })
             : "");
 
       new Notice(
-        `Пометки обновлены: ${sync.result.count}. `
-        + `Новых: ${sync.result.added}, изменённых: `
-        + `${sync.result.changed}, удалённых: ${sync.result.removed}.`
+        translate("notice.syncComplete", {
+          count: sync.result.count,
+          added: sync.result.added,
+          changed: sync.result.changed,
+          removed: sync.result.removed
+        })
         + atomicText
         + (sync.structureWarning === null
           ? ""
@@ -442,7 +504,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       if (error instanceof PdfStructureError) {
         structureWarning = error.message;
       } else {
-        structureWarning = "Не удалось восстановить структуру текста PDF.";
+        structureWarning = translate("notice.pdfStructureWarning");
       }
     }
 
@@ -515,7 +577,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
           ?? atomicNote.annotationNumber;
         if (annotationNumber === null) {
           throw new AtomicNoteError(
-            "Не найден порядковый номер пометки."
+            translate("notice.annotationNumberMissing")
           );
         }
 
@@ -544,7 +606,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     const annotationsFile = this.getActiveAnnotationsNote();
     if (annotationsFile === null) {
       new Notice(
-        "Откройте заметку книги или общую заметку с пометками",
+        translate("notice.openBookOrAnnotationsShort"),
         8000
       );
       return;
@@ -556,7 +618,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       "zotero_attachment_key"
     );
     if (attachmentKey.length === 0) {
-      new Notice("В общей заметке отсутствует ключ PDF Zotero", 8000);
+      new Notice(translate("notice.annotationsMissingAttachment"), 8000);
       return;
     }
 
@@ -598,7 +660,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
           created += 1;
         } catch (error: unknown) {
           failed.push(
-            `№ ${annotationNumber}: ${getErrorSummary(error)}`
+            `# ${annotationNumber}: ${getErrorSummary(error)}`
           );
         }
       }
@@ -608,10 +670,16 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
         : ` ${sync.structureWarning}`;
       const failureText = failed.length === 0
         ? ""
-        : ` Не удалось создать: ${failed.join(", ")}.`;
+        : translate("notice.createAtomicFailed", {
+          items: failed.join(", ")
+        });
       new Notice(
-        `Создано отдельных заметок: ${created}. `
-        + `Уже существовало: ${skipped}.${failureText}${warningText}`,
+        translate("notice.createAtomicSummary", {
+          created,
+          skipped,
+          failure: failureText,
+          warning: warningText
+        }),
         14000
       );
     } catch (error: unknown) {
@@ -671,9 +739,8 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     const atomicNote = await findAtomicNote(this.app, annotationKey);
 
     if (atomicNote === null) {
-      const createButton = container.createEl("button", {
-        text: "Создать заметку"
-      });
+      const createButton = container.createEl("button");
+      setLocalizedText(createButton, "button.createNote");
       createButton.addEventListener("click", () => {
         void this.createAtomicNoteFromAction(
           container,
@@ -687,16 +754,14 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       return;
     }
 
-    const openButton = container.createEl("button", {
-      text: "Открыть заметку"
-    });
+    const openButton = container.createEl("button");
+    setLocalizedText(openButton, "button.openNote");
     openButton.addEventListener("click", () => {
       void this.app.workspace.getLeaf(false).openFile(atomicNote);
     });
 
-    const updateButton = container.createEl("button", {
-      text: "Обновить заметку"
-    });
+    const updateButton = container.createEl("button");
+    setLocalizedText(updateButton, "button.updateNote");
     updateButton.addEventListener("click", () => {
       void this.updateAtomicNoteFromAction(
         container,
@@ -719,7 +784,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     button: HTMLButtonElement
   ): Promise<void> {
     button.disabled = true;
-    button.setText("Создание…");
+    setLocalizedText(button, "button.creating");
 
     try {
       const annotationsFile = this.getAnnotationsFile(annotationsPath);
@@ -735,7 +800,9 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
         annotationNumber
       );
       await this.app.workspace.getLeaf(false).openFile(atomicFile);
-      new Notice(`Создана заметка: ${atomicFile.basename}`);
+      new Notice(translate("notice.atomicCreated", {
+        name: atomicFile.basename
+      }));
       await this.renderAnnotationActions(
         container,
         annotationsPath,
@@ -746,7 +813,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     } catch (error: unknown) {
       this.showAtomicNoteError(error);
       button.disabled = false;
-      button.setText("Создать заметку");
+      setLocalizedText(button, "button.createNote");
     }
   }
 
@@ -760,7 +827,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     button: HTMLButtonElement
   ): Promise<void> {
     button.disabled = true;
-    button.setText("Обновление…");
+    setLocalizedText(button, "button.updating");
 
     try {
       const annotationsFile = this.getAnnotationsFile(annotationsPath);
@@ -775,7 +842,9 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
         annotation,
         annotationNumber
       );
-      new Notice(`Заметка обновлена: ${atomicFile.basename}`);
+      new Notice(translate("notice.atomicUpdated", {
+        name: atomicFile.basename
+      }));
       await this.renderAnnotationActions(
         container,
         annotationsPath,
@@ -786,7 +855,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     } catch (error: unknown) {
       this.showAtomicNoteError(error);
       button.disabled = false;
-      button.setText("Обновить заметку");
+      setLocalizedText(button, "button.updateNote");
     }
   }
 
@@ -794,7 +863,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     const file = this.app.vault.getAbstractFileByPath(path);
     if (!(file instanceof TFile) || file.extension !== "md") {
       throw new AtomicNoteError(
-        "Не удалось найти общую заметку с пометками."
+        translate("notice.annotationsNoteNotFound")
       );
     }
 
@@ -811,7 +880,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
     );
     if (annotation === undefined) {
       throw new AtomicNoteError(
-        "Пометка больше не существует в Zotero."
+        translate("note.annotationNoLongerExists")
       );
     }
 
@@ -842,8 +911,10 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
 
     const message = error instanceof Error
       ? error.message
-      : "Неизвестная ошибка";
-    new Notice(`Не удалось обработать отдельную заметку: ${message}`, 10000);
+      : translate("common.unknownError");
+    new Notice(translate("notice.atomicProcessFailed", {
+      message
+    }), 10000);
   }
 
   private getActiveAttachmentKey(): string | null {
@@ -868,7 +939,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       && error.failure === "api-disabled"
     ) {
       new Notice(
-        "В Zotero включите: Настройки → Расширенные → Разрешить другим приложениям на этом компьютере связываться с Zotero",
+        translate("notice.enableZoteroApi"),
         10000
       );
       return;
@@ -879,7 +950,7 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
       return;
     }
 
-    new Notice("Неизвестная ошибка подключения к Zotero", 8000);
+    new Notice(translate("notice.unknownConnectionError"), 8000);
   }
 }
 
@@ -945,5 +1016,5 @@ function getErrorSummary(error: unknown): string {
     return error.message.trim();
   }
 
-  return "неизвестная ошибка";
+  return translate("common.unknownErrorLower");
 }

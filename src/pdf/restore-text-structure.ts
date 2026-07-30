@@ -7,6 +7,7 @@ import {
   WorkerMessageHandler
 } from "pdfjs-dist/legacy/build/pdf.worker.mjs";
 
+import { translate } from "../i18n";
 import type { ZoteroAnnotation } from "../zotero";
 
 type PdfRect = [number, number, number, number];
@@ -57,7 +58,7 @@ export async function restoreAnnotationsTextStructure(
     pdfBytes = new Uint8Array(await readPdfFile(pdfPath));
   } catch {
     throw new PdfStructureError(
-      "Не удалось прочитать локальный PDF для восстановления абзацев."
+      translate("pdf.readFailed")
     );
   }
 
@@ -116,7 +117,7 @@ export async function restoreAnnotationsTextStructure(
     }
 
     throw new PdfStructureError(
-      "Не удалось проанализировать PDF для восстановления абзацев."
+      translate("pdf.analyzeFailed")
     );
   } finally {
     try {

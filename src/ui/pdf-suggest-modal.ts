@@ -3,6 +3,7 @@ import {
   FuzzySuggestModal
 } from "obsidian";
 
+import { translate } from "../i18n";
 import type { ZoteroPdfAttachment } from "../zotero";
 
 export class ZoteroPdfSuggestModal
@@ -19,19 +20,19 @@ export class ZoteroPdfSuggestModal
     this.attachments = attachments;
     this.onChoose = onChoose;
 
-    this.setPlaceholder("Выберите вложение PDF");
+    this.setPlaceholder(translate("modal.pdf.placeholder"));
     this.setInstructions([
       {
         command: "↑↓",
-        purpose: "выбрать"
+        purpose: translate("modal.instruction.select")
       },
       {
         command: "↵",
-        purpose: "подтвердить"
+        purpose: translate("modal.instruction.confirm")
       },
       {
         command: "esc",
-        purpose: "закрыть"
+        purpose: translate("modal.instruction.close")
       }
     ]);
   }
@@ -64,7 +65,9 @@ export class ZoteroPdfSuggestModal
 
     el.createDiv({
       cls: "zhs-book-suggestion-details",
-      text: attachment.filename || `Ключ Zotero: ${attachment.key}`
+      text: attachment.filename || translate("modal.pdf.key", {
+        key: attachment.key
+      })
     });
   }
 

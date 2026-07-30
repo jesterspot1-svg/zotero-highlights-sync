@@ -4,6 +4,7 @@ import {
   Vault
 } from "obsidian";
 
+import { translate } from "../i18n";
 import type {
   ZoteroAnnotation,
   ZoteroBook,
@@ -45,7 +46,10 @@ export async function readTemplate(
 
   if (!(template instanceof TFile) || template.extension !== "md") {
     throw new TemplateError(
-      `${label} не найден: ${normalizedPath || "путь не указан"}`
+      translate("template.notFound", {
+        label,
+        path: normalizedPath || translate("template.pathMissing")
+      })
     );
   }
 
@@ -74,7 +78,9 @@ export function renderTemplate(
 
   if (unknownVariables.size > 0) {
     throw new TemplateError(
-      `Неизвестные переменные шаблона: ${[...unknownVariables].join(", ")}`
+      translate("template.unknownVariables", {
+        variables: [...unknownVariables].join(", ")
+      })
     );
   }
 
@@ -195,5 +201,8 @@ function createManagedAnnotationsBlock(): string {
 
 function createAnnotationShortTitle(text: string, fallbackKey: string): string {
   const words = text.trim().split(/\s+/gu).filter((word) => word.length > 0);
-  return words.slice(0, 7).join(" ") || `Пометка ${fallbackKey}`;
+  return words.slice(0, 7).join(" ")
+    || translate("note.annotationShortTitleFallback", {
+      key: fallbackKey
+    });
 }

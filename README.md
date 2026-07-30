@@ -21,6 +21,7 @@ installation.
   `annotation_key`.
 - Preserve user-authored content outside managed synchronization markers.
 - Keep generated notes in the vault root without creating folders.
+- Switch the plugin interface between Russian and English.
 
 ## Requirements
 
@@ -38,15 +39,26 @@ installation.
    - annotations note;
    - atomic annotation note.
 2. Open **Settings → Zotero Highlights Sync**.
-3. Select the three template files.
-4. Run **Zotero Highlights Sync: Создание книги**.
+3. Choose **Русский** or **English**, then select the three template files.
+4. Run **Zotero Highlights Sync: Create book** (or **Создание книги**).
 5. Select a Zotero book and, when needed, its PDF attachment.
 6. Open the generated annotations note in Reading view and select
-   **Обновить пометки**.
+   **Update annotations** (or **Обновить пометки**).
 
 To create all missing atomic notes, assign a hotkey to
-**Zotero Highlights Sync: Создать отдельные заметки для всех пометок** in
-Obsidian's Hotkeys settings.
+**Zotero Highlights Sync: Create notes for all annotations** in Obsidian's
+Hotkeys settings. Its Russian name is
+**Создать отдельные заметки для всех пометок**.
+
+## Interface language
+
+Choose **Русский** or **English** under
+**Settings → Zotero Highlights Sync → Language**. The selection controls
+commands, settings, buttons, notices, picker dialogs, validation messages,
+and labels generated inside managed annotation blocks. Existing note
+filenames, links, frontmatter keys, synchronization markers, and template
+variables are never renamed. Labels already written to managed blocks are
+updated the next time annotations are synchronized.
 
 ## Synchronization behavior
 
@@ -165,3 +177,37 @@ Zotero Highlights Sync — настольный плагин Obsidian для с�
 
 Плагин обращается только к локальному API Zotero, не использует телеметрию и
 не отправляет содержимое хранилища или PDF во внешние сервисы.
+
+### Возможности
+
+- Создание заметки книги и отдельной заметки
+  `Annotations for Название книги` по вашим шаблонам.
+- Синхронизация текста, комментариев, цветов, страниц и ссылок на точное место
+  пометки в Zotero.
+- Восстановление абзацев и списков из локального PDF.
+- Стабильная нумерация пометок при сортировке по их положению в книге.
+- Создание, открытие и обновление отдельной заметки для каждой пометки.
+- Сохранение вручную переименованных заметок пометок.
+- Работа в корне хранилища без автоматического создания папок.
+
+### Настройка языка
+
+Откройте **Настройки → Zotero Highlights Sync → Язык** и выберите
+**Русский** или **English**. Выбор применяется к командам, настройкам,
+кнопкам, уведомлениям, окнам выбора, сообщениям проверки и подписям внутри
+служебных блоков пометок.
+
+Переключение языка не переименовывает существующие заметки, ссылки, свойства,
+служебные маркеры и переменные шаблонов. Уже созданные подписи внутри
+служебных блоков изменятся при следующем обновлении пометок.
+
+### Быстрый старт
+
+1. Создайте три Markdown-шаблона: для книги, общей заметки с пометками и
+   отдельной пометки.
+2. Выберите эти файлы в настройках плагина.
+3. Запустите команду **Создание книги**.
+4. Выберите книгу и PDF из Zotero.
+5. В режиме чтения общей заметки нажмите **Обновить пометки**.
+6. При необходимости назначьте горячую клавишу команде
+   **Создать отдельные заметки для всех пометок**.

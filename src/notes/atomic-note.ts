@@ -5,6 +5,7 @@ import {
   TFile
 } from "obsidian";
 
+import { translate } from "../i18n";
 import type { ZoteroHighlightsSyncSettings } from "../settings";
 import { renderAtomicAnnotationManagedBlock } from "../sync";
 import {
@@ -106,7 +107,7 @@ export async function createAtomicNote(
   const template = await readTemplate(
     app.vault,
     settings.annotationTemplatePath,
-    "Шаблон отдельной пометки"
+    translate("template.annotationLabel")
   );
   const managedBlock = renderAtomicAnnotationManagedBlock(
     annotation,
@@ -208,13 +209,13 @@ async function readAnnotationNoteContext(
 
   if (context.itemKey.length === 0 || context.attachmentKey.length === 0) {
     throw new AtomicNoteError(
-      "В общей заметке отсутствуют ключ книги или ключ PDF Zotero."
+      translate("note.atomicMissingBookData")
     );
   }
 
   if (context.bookName.length === 0) {
     throw new AtomicNoteError(
-      "В свойстве links общей заметки отсутствует ссылка на заметку книги."
+      translate("note.atomicMissingBookLink")
     );
   }
 
@@ -374,7 +375,7 @@ function replaceAtomicManagedBlock(
 
   if (startIndex < 0 || endIndex < startIndex) {
     throw new AtomicNoteError(
-      "В отдельной заметке не найден служебный блок пометки."
+      translate("note.atomicMissingManagedBlock")
     );
   }
 

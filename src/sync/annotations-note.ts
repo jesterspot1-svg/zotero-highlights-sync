@@ -1,3 +1,4 @@
+import { translate } from "../i18n";
 import type { ZoteroAnnotation } from "../zotero";
 
 export interface AnnotationSyncResult {
@@ -35,9 +36,7 @@ export function synchronizeAnnotationsContent(
 
   if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
     throw new AnnotationSyncError(
-      "В заметке не найден служебный блок пометок. "
-      + "Верните переменную {{zhs.annotations.managed_block}} в шаблон "
-      + "и заново создайте заметку."
+      translate("sync.missingManagedBlock")
     );
   }
 
@@ -168,7 +167,7 @@ function renderAnnotation(
   ].join(" ");
   const calloutType = getCalloutType(annotation.color);
   const page = annotation.pageLabel.length > 0
-    ? ` · стр. ${annotation.pageLabel}`
+    ? ` · ${translate("sync.page", { page: annotation.pageLabel })}`
     : "";
   const lines = [
     marker,
@@ -178,13 +177,13 @@ function renderAnnotation(
   if (annotation.text.length > 0) {
     lines.push(...quoteText(annotation.text));
   } else {
-    lines.push("> _Текст выделения отсутствует_");
+    lines.push(`> _${translate("sync.noText")}_`);
   }
 
   if (annotation.comment.length > 0) {
     lines.push(
       ">",
-      "> **Комментарий Zotero**",
+      `> **${translate("sync.zoteroComment")}**`,
       ">",
       ...quoteText(annotation.comment)
     );
@@ -196,7 +195,7 @@ function renderAnnotation(
   ].join("");
   lines.push(
     ">",
-    `> [Открыть пометку в Zotero](${zoteroLink})`,
+    `> [${translate("sync.openInZotero")}](${zoteroLink})`,
     "",
     "```zhs-annotation-actions",
     `annotation_key: ${annotation.key}`,
@@ -215,7 +214,7 @@ export function renderAtomicAnnotationManagedBlock(
 ): string {
   const calloutType = getCalloutType(annotation.color);
   const page = annotation.pageLabel.length > 0
-    ? ` · стр. ${annotation.pageLabel}`
+    ? ` · ${translate("sync.page", { page: annotation.pageLabel })}`
     : "";
   const lines = [
     "<!-- zhs:atomic-annotation:start -->",
@@ -225,13 +224,13 @@ export function renderAtomicAnnotationManagedBlock(
   if (annotation.text.length > 0) {
     lines.push(...quoteText(annotation.text));
   } else {
-    lines.push("> _Текст выделения отсутствует_");
+    lines.push(`> _${translate("sync.noText")}_`);
   }
 
   if (annotation.comment.length > 0) {
     lines.push(
       ">",
-      "> **Комментарий Zotero**",
+      `> **${translate("sync.zoteroComment")}**`,
       ">",
       ...quoteText(annotation.comment)
     );
@@ -243,7 +242,7 @@ export function renderAtomicAnnotationManagedBlock(
   ].join("");
   lines.push(
     ">",
-    `> [Открыть пометку в Zotero](${zoteroLink})`,
+    `> [${translate("sync.openInZotero")}](${zoteroLink})`,
     "<!-- zhs:atomic-annotation:end -->"
   );
 

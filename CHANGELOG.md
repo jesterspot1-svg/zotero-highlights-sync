@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-30
+
+### Added
+
+- Added a Russian and English language selector to the plugin settings.
+- Localized commands, settings, buttons, notices, picker dialogs, validation
+  messages, and generated annotation labels.
+
+### Changed
+
+- Added settings compatibility for both Obsidian 1.12.7 and the declarative
+  settings API introduced in Obsidian 1.13.
+- Expanded the English and Russian usage documentation.
+- Kept existing note paths, synchronization markers, and template variable
+  names stable when switching languages.
+
 ## [1.0.1] - 2026-07-29
 
 ### Changed

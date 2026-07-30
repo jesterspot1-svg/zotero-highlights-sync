@@ -3,6 +3,7 @@ import {
   FuzzySuggestModal
 } from "obsidian";
 
+import { translate } from "../i18n";
 import type { ZoteroBook } from "../zotero";
 
 export class ZoteroBookSuggestModal extends FuzzySuggestModal<ZoteroBook> {
@@ -18,19 +19,19 @@ export class ZoteroBookSuggestModal extends FuzzySuggestModal<ZoteroBook> {
     this.books = books;
     this.onChoose = onChoose;
 
-    this.setPlaceholder("Введите название книги или автора");
+    this.setPlaceholder(translate("modal.book.placeholder"));
     this.setInstructions([
       {
         command: "↑↓",
-        purpose: "выбрать"
+        purpose: translate("modal.instruction.select")
       },
       {
         command: "↵",
-        purpose: "подтвердить"
+        purpose: translate("modal.instruction.confirm")
       },
       {
         command: "esc",
-        purpose: "закрыть"
+        purpose: translate("modal.instruction.close")
       }
     ]);
   }
@@ -71,7 +72,7 @@ export class ZoteroBookSuggestModal extends FuzzySuggestModal<ZoteroBook> {
       cls: "zhs-book-suggestion-details",
       text: details.length > 0
         ? details.join(" · ")
-        : "Автор и год не указаны"
+        : translate("modal.book.noDetails")
     });
   }
 
@@ -79,4 +80,3 @@ export class ZoteroBookSuggestModal extends FuzzySuggestModal<ZoteroBook> {
     this.onChoose(book);
   }
 }
-

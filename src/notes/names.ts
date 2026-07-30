@@ -1,3 +1,5 @@
+import { translate } from "../i18n";
+
 export function sanitizeNoteName(
   title: string,
   fallback: string
@@ -12,7 +14,7 @@ export function sanitizeNoteName(
   const filename = sanitized.length > 0 ? sanitized : fallback;
 
   return isWindowsReservedName(filename)
-    ? `${filename} — заметка`
+    ? translate("note.annotationSuffix", { filename })
     : filename;
 }
 
@@ -25,7 +27,7 @@ export function createAnnotationNoteName(
 
   return sanitizeNoteName(
     firstWords,
-    `Пометка ${annotationKey}`
+    translate("note.annotationFallback", { key: annotationKey })
   );
 }
 

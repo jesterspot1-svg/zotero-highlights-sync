@@ -5,6 +5,7 @@ import {
   Vault
 } from "obsidian";
 
+import { translate } from "../i18n";
 import type { ZoteroHighlightsSyncSettings } from "../settings";
 import {
   readTemplate,
@@ -44,25 +45,25 @@ export async function createBookNotes(
   const bookTemplate = await readTemplate(
     vault,
     settings.bookTemplatePath,
-    "Шаблон заметки книги"
+    translate("template.bookLabel")
   );
   const annotationsTemplate = await readTemplate(
     vault,
     settings.annotationsTemplatePath,
-    "Шаблон общей заметки аннотаций"
+    translate("template.annotationsLabel")
   );
 
   const existingBook = await validateDestination(
     vault,
     bookPath,
     book.key,
-    "заметки книги"
+    translate("note.bookDescription")
   );
   const existingAnnotations = await validateDestination(
     vault,
     annotationsPath,
     book.key,
-    "заметки с пометками"
+    translate("note.annotationsDescription")
   );
 
   const context = {
@@ -92,7 +93,7 @@ export async function createBookNotes(
 function createNoteNames(book: ZoteroBook): TemplateNoteNames {
   const bookName = sanitizeNoteName(
     book.title,
-    `Без названия ${book.key}`
+    translate("note.untitled", { key: book.key })
   );
 
   return {
@@ -122,8 +123,10 @@ async function validateDestination(
 
   if (existingItemKey !== itemKey) {
     throw new NoteCreationError(
-      `Файл ${path} уже существует, но не относится к выбранной книге. `
-      + `Переименуйте существующий файл или книгу перед созданием ${description}.`
+      translate("note.pathOccupiedByOtherBook", {
+        path,
+        description
+      })
     );
   }
 
@@ -136,7 +139,7 @@ function assertMarkdownFile(
 ): asserts file is TFile {
   if (!(file instanceof TFile) || file.extension !== "md") {
     throw new NoteCreationError(
-      `Путь ${path} уже занят и не является Markdown-заметкой.`
+      translate("note.pathOccupied", { path })
     );
   }
 }

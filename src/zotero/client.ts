@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 
 import { requestUrl } from "obsidian";
 
+import { translate } from "../i18n";
 import {
   type ZoteroAnnotation,
   type ZoteroBook,
@@ -131,14 +132,14 @@ export class ZoteroClient {
       if (response.status === 403) {
         throw new ZoteroConnectionError(
           "api-disabled",
-          "Локальный API Zotero выключен."
+          translate("zotero.apiDisabled")
         );
       }
 
       if (response.status < 200 || response.status >= 300) {
         throw new ZoteroConnectionError(
           "invalid-response",
-          `Zotero вернул HTTP ${response.status}.`
+          translate("zotero.http", { status: response.status })
         );
       }
 
@@ -146,7 +147,7 @@ export class ZoteroClient {
       if (!Array.isArray(payload)) {
         throw new ZoteroConnectionError(
           "invalid-response",
-          "Zotero вернул данные в неожиданном формате."
+          translate("zotero.invalidBooks")
         );
       }
 
@@ -173,14 +174,16 @@ export class ZoteroClient {
       if (response.status === 403) {
         throw new ZoteroConnectionError(
           "api-disabled",
-          "Локальный API Zotero выключен."
+          translate("zotero.apiDisabled")
         );
       }
 
       if (response.status < 200 || response.status >= 300) {
         throw new ZoteroConnectionError(
           "invalid-response",
-          `Zotero вернул HTTP ${response.status} при загрузке вложений.`
+          translate("zotero.httpAttachments", {
+            status: response.status
+          })
         );
       }
 
@@ -188,7 +191,7 @@ export class ZoteroClient {
       if (!Array.isArray(payload)) {
         throw new ZoteroConnectionError(
           "invalid-response",
-          "Zotero вернул список вложений в неожиданном формате."
+          translate("zotero.invalidAttachments")
         );
       }
 
@@ -221,14 +224,16 @@ export class ZoteroClient {
         if (response.status === 403) {
           throw new ZoteroConnectionError(
             "api-disabled",
-            "Локальный API Zotero выключен."
+            translate("zotero.apiDisabled")
           );
         }
 
         if (response.status < 200 || response.status >= 300) {
           throw new ZoteroConnectionError(
             "invalid-response",
-            `Zotero вернул HTTP ${response.status} при загрузке пометок.`
+            translate("zotero.httpAnnotations", {
+              status: response.status
+            })
           );
         }
 
@@ -236,7 +241,7 @@ export class ZoteroClient {
         if (!Array.isArray(payload)) {
           throw new ZoteroConnectionError(
             "invalid-response",
-            "Zotero вернул список пометок в неожиданном формате."
+            translate("zotero.invalidAnnotations")
           );
         }
 
@@ -274,7 +279,7 @@ export class ZoteroClient {
       ) {
         throw new ZoteroConnectionError(
           "invalid-response",
-          "Zotero не вернул путь к выбранному PDF."
+          translate("zotero.noPdfPath")
         );
       }
 
@@ -282,7 +287,7 @@ export class ZoteroClient {
       if (fileUrl.protocol !== "file:") {
         throw new ZoteroConnectionError(
           "invalid-response",
-          "Zotero вернул небезопасный путь к PDF."
+          translate("zotero.unsafePdfPath")
         );
       }
 
@@ -307,14 +312,16 @@ export class ZoteroClient {
       if (response.status === 403) {
         throw new ZoteroConnectionError(
           "api-disabled",
-          "Локальный API Zotero выключен."
+          translate("zotero.apiDisabled")
         );
       }
 
       if (response.status < 200 || response.status >= 300) {
         throw new ZoteroConnectionError(
           "invalid-response",
-          `Zotero вернул HTTP ${response.status} при чтении числа страниц.`
+          translate("zotero.httpPageCount", {
+            status: response.status
+          })
         );
       }
 
@@ -414,7 +421,7 @@ function requestWithNodeHttp(url: string): Promise<LocalHttpResponse> {
     );
 
     request.on("timeout", () => {
-      request.destroy(new Error("Превышено время ожидания ответа Zotero."));
+      request.destroy(new Error(translate("zotero.timeout")));
     });
     request.on("error", (error: unknown) => {
       reject(toError(error));
@@ -445,7 +452,7 @@ function parseJson(text: string): unknown {
   } catch {
     throw new ZoteroConnectionError(
       "invalid-response",
-      "Zotero вернул некорректный JSON."
+      translate("zotero.invalidJson")
     );
   }
 }
@@ -506,7 +513,7 @@ function normalizeBook(item: ZoteroBookApiItem): ZoteroBook {
 
   return {
     key: item.key,
-    title: readText(item.data.title, "Без названия"),
+    title: readText(item.data.title, translate("zotero.untitled")),
     authors: creators
       .filter((creator) => creator.creatorType === "author")
       .map(formatCreator)
@@ -625,7 +632,7 @@ function normalizeConnectionError(error: unknown): ZoteroConnectionError {
   return new ZoteroConnectionError(
     "not-running",
     details.length > 0
-      ? `Не удалось подключиться к локальному API Zotero: ${details}`
-      : "Не удалось подключиться к локальному API Zotero."
+      ? translate("zotero.connectionFailed", { details })
+      : translate("zotero.connectionFailedShort")
   );
 }
