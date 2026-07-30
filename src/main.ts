@@ -31,6 +31,7 @@ import {
 } from "./pdf";
 import {
   DEFAULT_SETTINGS,
+  resolvePluginLanguage,
   type ZoteroHighlightsSyncSettings
 } from "./settings";
 import {
@@ -216,17 +217,22 @@ export default class ZoteroHighlightsSyncPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
+    const savedSettings = await this.loadData() as
+      Partial<ZoteroHighlightsSyncSettings> | null;
+    const savedLanguage = savedSettings?.language;
     const loaded = {
       ...DEFAULT_SETTINGS,
-      ...(await this.loadData() as Partial<ZoteroHighlightsSyncSettings> | null)
+      ...savedSettings
     };
     this.settings = {
       ...loaded,
-      language: isPluginLanguage(loaded.language)
-        ? loaded.language
-        : DEFAULT_SETTINGS.language
+      language: resolvePluginLanguage(savedSettings)
     };
     setPluginLanguage(this.settings.language);
+
+    if (savedSettings !== null && !isPluginLanguage(savedLanguage)) {
+      await this.saveSettings();
+    }
   }
 
   async saveSettings(): Promise<void> {

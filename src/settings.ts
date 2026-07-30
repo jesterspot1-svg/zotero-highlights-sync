@@ -1,4 +1,7 @@
-import type { PluginLanguage } from "./i18n";
+import {
+  isPluginLanguage,
+  type PluginLanguage
+} from "./i18n";
 
 export interface ZoteroHighlightsSyncSettings {
   language: PluginLanguage;
@@ -8,8 +11,18 @@ export interface ZoteroHighlightsSyncSettings {
 }
 
 export const DEFAULT_SETTINGS: ZoteroHighlightsSyncSettings = {
-  language: "ru",
+  language: "en",
   bookTemplatePath: "",
   annotationsTemplatePath: "",
   annotationTemplatePath: ""
 };
+
+export function resolvePluginLanguage(
+  savedSettings: Partial<ZoteroHighlightsSyncSettings> | null
+): PluginLanguage {
+  if (isPluginLanguage(savedSettings?.language)) {
+    return savedSettings.language;
+  }
+
+  return savedSettings === null ? DEFAULT_SETTINGS.language : "ru";
+}

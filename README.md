@@ -58,7 +58,8 @@ commands, settings, buttons, notices, picker dialogs, validation messages,
 and labels generated inside managed annotation blocks. Existing note
 filenames, links, frontmatter keys, synchronization markers, and template
 variables are never renamed. Labels already written to managed blocks are
-updated the next time annotations are synchronized.
+updated the next time annotations are synchronized. New installations start
+in English.
 
 ## Synchronization behavior
 
@@ -195,7 +196,8 @@ Zotero Highlights Sync — настольный плагин Obsidian для с�
 Откройте **Настройки → Zotero Highlights Sync → Язык** и выберите
 **Русский** или **English**. Выбор применяется к командам, настройкам,
 кнопкам, уведомлениям, окнам выбора, сообщениям проверки и подписям внутри
-служебных блоков пометок.
+служебных блоков пометок. При новой установке первоначально используется
+английский язык.
 
 Переключение языка не переименовывает существующие заметки, ссылки, свойства,
 служебные маркеры и переменные шаблонов. Уже созданные подписи внутри
